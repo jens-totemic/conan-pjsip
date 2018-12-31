@@ -39,7 +39,7 @@ class PjsipConan(ConanFile):
 
     def requirements(self):
         if self.options.SSL:
-            self.requires("OpenSSL/1.1.0i@conan/stable")
+            self.requires("OpenSSL/1.0.2@conan/stable")
 
     def _configure_autotools(self):
         if not self._autotools:
