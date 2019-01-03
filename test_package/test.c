@@ -1,7 +1,5 @@
 #include <pjsua-lib/pjsua.h>
 
-const int PJ_PORT=5063;
-
 int main() {
     pj_status_t status;
     pjsua_state pj_state;
@@ -18,7 +16,7 @@ int main() {
     /* Init pjsua */
     {
     const pjsua_config cfg;
-    pjsua_logging_config log_cfg;
+    const pjsua_logging_config log_cfg;
 
     pjsua_config_default(&cfg);
 //     cfg.cb.on_incoming_call = &on_incoming_call;
@@ -34,10 +32,10 @@ int main() {
 
     /* Add UDP transport. */
     {
-    pjsua_transport_config cfg;
+    const pjsua_transport_config cfg;
 
     pjsua_transport_config_default(&cfg);
-    cfg.port = PJ_PORT;
+    cfg.port = 5063;
     status = pjsua_transport_create(PJSIP_TRANSPORT_UDP, &cfg, NULL);
     if (status != PJ_SUCCESS) return EXIT_FAILURE;
     }
