@@ -4,6 +4,7 @@ import glob
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
+_openSSL = "OpenSSL"
 
 # based on https://github.com/conan-community/conan-ncurses/blob/stable/6.1/conanfile.py
 class PjsipConan(ConanFile):
@@ -42,7 +43,7 @@ class PjsipConan(ConanFile):
 
     def requirements(self):
         if self.options.SSL:
-            self.requires("OpenSSL/1.0.2@conan/stable")
+            self.requires(_openSSL+"/1.0.2@conan/stable")
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -51,6 +52,9 @@ class PjsipConan(ConanFile):
             args = ["--disable-libwebrtc"]
             if self.options.shared: 
                 args.append("--enable-shared")
+            if self.options.SSL:
+                openSSLroot = self.output.info(self.deps_cpp_info[_openSSL].rootpath)
+                args.append("--with-ssl=" + str(openSSLroot))
             self._autotools = AutoToolsBuildEnvironment(self)
             self.output.info("Variables")
             #self.output.info(self.deps_cpp_info.lib_paths)
