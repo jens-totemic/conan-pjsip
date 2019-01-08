@@ -111,7 +111,7 @@ class PjsipConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-    def copy_cleaned(self, source, prefix, dest, excludes = []):
+    def copy_cleaned(self, source, prefix, dest, excludes):
         for e in source:
             entry = e[len(prefix):] if e.startswith(prefix) else e
             if len(entry) > 0 and not entry in dest and not entry in excludes:
@@ -141,7 +141,7 @@ class PjsipConan(ConanFile):
             self.output.info(pkg_config.cflags)
             self.output.info(pkg_config.cflags_only_I)
             self.output.info(pkg_config.variables)
-        self.copy_cleaned(pkg_config.libs_only_L, "-L", self.cpp_info.lib_paths)
+        self.copy_cleaned(pkg_config.libs_only_L, "-L", self.cpp_info.lib_paths, [])
         self.output.info(self.cpp_info.lib_paths)
         
         # exclude all libraries from dependencies here, they are separately included
