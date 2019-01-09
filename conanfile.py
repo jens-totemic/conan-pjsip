@@ -55,16 +55,16 @@ class PjsipConan(ConanFile):
             if self.options.shared: 
                 args.append("--enable-shared")
             if self.options.SSL:
-                openSSLroot = self.output.info(self.deps_cpp_info[_openSSL].rootpath)
-                args.append("--with-ssl=" + str(openSSLroot))
+                openSSLroot = self.deps_cpp_info[_openSSL].rootpath
+                args.append("--with-ssl=%s" % openSSLroot)
+                self.output.info("openSSLroot: %s" % openSSLroot)
             self._autotools = AutoToolsBuildEnvironment(self)
-            self.output.info("Variables")
             #self.output.info(self.deps_cpp_info.lib_paths)
-            self.output.info(self._autotools.library_paths)
+            self.output.info("autotools.library_paths: %s" % self._autotools.library_paths)
             #self.output.info(self.deps_env_info.lib_paths)
             #vars = self._autotools.vars
             #vars["DYLD_LIBRARY_PATH"] = self._autotools.library_paths
-            self.output.info(self._autotools.vars)
+            self.output.info("autotools.vars: %s" % self._autotools.vars)
             
             #with tools.environment_append({"DYLD_LIBRARY_PATH": self._autotools.library_paths}):
             #    self.run("DYLD_LIBRARY_PATH=%s ./configure --enable-shared" % os.environ['DYLD_LIBRARY_PATH'])  
@@ -100,7 +100,7 @@ class PjsipConan(ConanFile):
             # which are not used by pjsip's makefiles. Instead, add them to CFLAGS
             cflags = env_build_vars['CFLAGS'] + " " + env_build_vars['CPPFLAGS']
             env_build_vars['CFLAGS'] = cflags
-            self.output.info(env_build_vars)
+            self.output.info("env_build_vars: %s" % env_build_vars)
             # only build the lib target, we don't want to build the sample apps
             autotools.make(target="lib", vars=env_build_vars)
 
@@ -135,28 +135,33 @@ class PjsipConan(ConanFile):
                 cur_prefix = ""
 
     def package_info(self):
-        self.output.info("package_info")
+        excluded_dep_libs = []
+        for k, v in self.deps_cpp_info.dependencies:
+            excluded_dep_libs.extend(v.libs)
+        
         pkgconfigpath = os.path.join(self.package_folder, "lib/pkgconfig")
-        self.output.info(pkgconfigpath)
+        self.output.info("package info file: " + pkgconfigpath)
         with tools.environment_append({'PKG_CONFIG_PATH': pkgconfigpath}):
             pkg_config = tools.PkgConfig("libpjproject")
-            self.output.info(pkg_config.libs)
-            self.output.info(pkg_config.libs_only_L)
-            self.output.info(pkg_config.libs_only_l)
-            self.output.info(pkg_config.libs_only_other)
-            self.output.info(pkg_config.cflags)
-            self.output.info(pkg_config.cflags_only_I)
-            self.output.info(pkg_config.variables)
-        self.copy_cleaned(pkg_config.libs_only_L, "-L", self.cpp_info.lib_paths, [])
-        self.output.info(self.cpp_info.lib_paths)
+            self.output.info("PKG_libs: %s" % pkg_config.libs)
+            self.output.info("PKG_libs_only_L: %s" % pkg_config.libs_only_L)
+            self.output.info("PKG_libs_only_l: %s" % pkg_config.libs_only_l)
+            self.output.info("PKG_libs_only_other: %s" % pkg_config.libs_only_other)
+            self.output.info("PKG_cflags: %s" % pkg_config.cflags)
+            self.output.info("PKG_cflags_only_I: %s" % pkg_config.cflags_only_I)
+            self.output.info("PKG_variables: %s" % pkg_config.variables)
+            
+            self.copy_cleaned(pkg_config.libs_only_L, "-L", self.cpp_info.lib_paths, [])
+            self.output.info("lib_paths %s" % self.cpp_info.lib_paths)
         
-        # exclude all libraries from dependencies here, they are separately included
-        self.copy_cleaned(pkg_config.libs_only_l, "-l", self.cpp_info.libs, ["ssl", "crypto", "z"])
-        self.output.info(self.cpp_info.libs)        
+            # exclude all libraries from dependencies here, they are separately included
+            self.copy_cleaned(pkg_config.libs_only_l, "-l", self.cpp_info.libs, excluded_dep_libs) #["ssl", "crypto", "z"]
+            self.output.info("libs: %s" % self.cpp_info.libs)
+            self.output.info("libs excluded: %s" % excluded_dep_libs)        
         
-        self.copy_prefix_merged(pkg_config.libs_only_other, "-framework", self.cpp_info.exelinkflags)
-        self.output.info(self.cpp_info.exelinkflags)
-        self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+            self.copy_prefix_merged(pkg_config.libs_only_other, "-framework", self.cpp_info.exelinkflags)
+            self.output.info("exelinkflags: %s" % self.cpp_info.exelinkflags)
+            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
         
 #         self.cpp_info.libs = tools.collect_libs(self)
 #         if self.settings.os == 'Macos':
