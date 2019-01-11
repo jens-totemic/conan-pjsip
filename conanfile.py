@@ -17,9 +17,15 @@ class PjsipConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "SSL": [True, False],
+               # when using little endian on armv7, we can enable neon for pjsip
+               # this setting replaces host arm-linux-gnueabihf with armv7l-linux-gnueabihf
+               # if our current arch is set to any armv7
+               "armv7l": [True, False],
+               # sets PJSUA_DEFAULT_EC_TAIL_LEN to 4, which seems to sound better
+               "shortDefaultEcTailLen": [True, False],
                "fPIC": [True, False]}
     # if no OpenSSL is found, pjsip might try to use GnuTLS
-    default_options = {"shared": False, "SSL": True, "fPIC": True}   
+    default_options = {"shared": False, "SSL": True, "armv7l": True, "shortDefaultEcTailLen":True, "fPIC": True}   
     generators = "cmake"
     exports = "LICENSE"
     _autotools = None
@@ -49,16 +55,34 @@ class PjsipConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
+            self._autotools = AutoToolsBuildEnvironment(self)
             # Getting build errors when cross-compiling webrtc on ARM
             # since we don't use it, just disable it for now
-            args = ["--disable-libwebrtc"]
+            args = [] # "--disable-libwebrtc"
             if self.options.shared: 
                 args.append("--enable-shared")
             if self.options.SSL:
                 openSSLroot = self.deps_cpp_info[_openSSL].rootpath
                 args.append("--with-ssl=%s" % openSSLroot)
                 self.output.info("openSSLroot: %s" % openSSLroot)
-            self._autotools = AutoToolsBuildEnvironment(self)
+            if self.options.shortDefaultEcTailLen:
+                self._autotools.defines.append("PJSUA_DEFAULT_EC_TAIL_LEN=4")
+            # pjsip expects the architecture to be armv7hf-linux-gnueabihf
+            host = self._autotools.host
+            arch = str(self.settings.arch)
+                       
+            # turn armv7* into armv7l*
+            # autotools checks the architecture by running "config.sub"
+            # which does not allow armv7l as architecture unless the manufacturer
+            # is set to "unknown"
+            if self.options.armv7l and arch.startswith("armv7") and host.startswith("arm-"):
+                # a manufacturer entry was already specified
+                if host.startswith("arm-unknown-"):
+                    host = "armv7l-" + host[:12]
+                else:
+                    host = "armv7l-unknown-" + host[4:]
+                self._autotools.host = host
+                self.output.info("Forcing host to: %s" % self._autotools.host)
             #self.output.info(self.deps_cpp_info.lib_paths)
             self.output.info("autotools.library_paths: %s" % self._autotools.library_paths)
             #self.output.info(self.deps_env_info.lib_paths)
