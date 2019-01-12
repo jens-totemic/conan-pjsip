@@ -21,11 +21,12 @@ class PjsipConan(ConanFile):
                # this setting replaces host arm-linux-gnueabihf with armv7l-linux-gnueabihf
                # if our current arch is set to any armv7
                "armv7l": [True, False],
-               # sets PJSUA_DEFAULT_EC_TAIL_LEN to 4, which seems to sound better
-               "shortDefaultEcTailLen": [True, False],
+               # the default echo cancellation algo is SPEEX_AEC
+               # in order to prefer WEBRTC_AEC, we can disable it
+               "disableSpeexAec": [True, False],
                "fPIC": [True, False]}
     # if no OpenSSL is found, pjsip might try to use GnuTLS
-    default_options = {"shared": False, "SSL": True, "armv7l": True, "shortDefaultEcTailLen":True, "fPIC": True}   
+    default_options = {"shared": False, "SSL": True, "armv7l": True, "disableSpeexAec":True, "fPIC": True}   
     generators = "cmake"
     exports = "LICENSE"
     _autotools = None
@@ -65,8 +66,8 @@ class PjsipConan(ConanFile):
                 openSSLroot = self.deps_cpp_info[_openSSL].rootpath
                 args.append("--with-ssl=%s" % openSSLroot)
                 self.output.info("openSSLroot: %s" % openSSLroot)
-            if self.options.shortDefaultEcTailLen:
-                self._autotools.defines.append("PJSUA_DEFAULT_EC_TAIL_LEN=4")
+            if self.options.disableSpeexAec:
+                self._autotools.defines.append("PJMEDIA_HAS_SPEEX_AEC=0")
             # pjsip expects the architecture to be armv7hf-linux-gnueabihf
             host = self._autotools.host
             arch = str(self.settings.arch)
