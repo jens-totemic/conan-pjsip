@@ -1,0 +1,33 @@
+diff --git a/pjsip/include/pjsua-lib/pjsua.h b/pjsip/include/pjsua-lib/pjsua.h
+index a0b21d646..55a70b98f 100644
+--- a/pjsip/include/pjsua-lib/pjsua.h
++++ b/pjsip/include/pjsua-lib/pjsua.h
+@@ -7451,6 +7451,10 @@ PJ_DECL(pj_status_t) pjsua_get_ec_tail(unsigned *p_tail_ms);
+  */
+ PJ_DECL(pj_bool_t) pjsua_snd_is_active(void);
+ 
++/**
++ * Added by Jens: Get the current sound device.
++ */
++PJ_DEF(pjmedia_snd_port *) pjsua_get_snd_port(void);
+     
+ /**
+  * Configure sound device setting to the sound device being used. If sound 
+diff --git a/pjsip/src/pjsua-lib/pjsua_aud.c b/pjsip/src/pjsua-lib/pjsua_aud.c
+index 3ad1efdcf..c7956ad1b 100644
+--- a/pjsip/src/pjsua-lib/pjsua_aud.c
++++ b/pjsip/src/pjsua-lib/pjsua_aud.c
+@@ -2284,6 +2284,13 @@ PJ_DEF(pj_bool_t) pjsua_snd_is_active(void)
+     return pjsua_var.snd_port != NULL;
+ }
+ 
++/*
++ * Added by Jens: Get the current sound device.
++ */
++PJ_DEF(pjmedia_snd_port *) pjsua_get_snd_port(void)
++{
++    return pjsua_var.snd_port;
++}
+ 
+ /*
+  * Configure sound device setting to the sound device being used.

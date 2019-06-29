@@ -9,9 +9,9 @@ _openSSL = "OpenSSL"
 # based on https://github.com/conan-community/conan-ncurses/blob/stable/6.1/conanfile.py
 class PjsipConan(ConanFile):
     name = "pjsip"
-    version = "2.8"
+    version = "2.9"
     license = "GPL2"
-    homepage = "https://github.com/totemic/pjproject"
+    homepage = "https://github.com/pjsip/pjproject"
     description = "PJSIP is a free and open source multimedia communication library written in C language implementing standard based protocols such as SIP, SDP, RTP, STUN, TURN, and ICE."
     url = "https://github.com/jens-totemic/conan-pjsip"    
     settings = "os", "compiler", "build_type", "arch"
@@ -29,6 +29,7 @@ class PjsipConan(ConanFile):
     default_options = {"shared": False, "SSL": True, "armv7l": True, "disableSpeexAec":True, "fPIC": True}   
     generators = "cmake"
     exports = "LICENSE"
+    exports_sources = ["0001-add-soundport-accessor.patch"]
     _autotools = None
     _source_subfolder = "source_subfolder"
 
@@ -118,6 +119,7 @@ class PjsipConan(ConanFile):
         return self._autotools
         
     def build(self):
+        tools.patch(base_path=self._source_subfolder, patch_file="0001-add-soundport-accessor.patch")
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             env_build_vars = autotools.vars
