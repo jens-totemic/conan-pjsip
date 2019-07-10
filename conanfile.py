@@ -29,7 +29,7 @@ class PjsipConan(ConanFile):
     default_options = {"shared": False, "SSL": True, "armv7l": True, "disableSpeexAec":True, "fPIC": True}   
     generators = "cmake"
     exports = "LICENSE"
-    exports_sources = ["0001-add-soundport-accessor.patch"]
+    exports_sources = ["01-arm64linux.patch", "02-increase-alsa-device-count.patch", "03-add-soundport-accessor.patch"]
     _autotools = None
     _source_subfolder = "source_subfolder"
 
@@ -52,6 +52,7 @@ class PjsipConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libasound2/1.1.0@totemic/stable")
+            self.requires("libuuid1/2.27.1@totemic/stable")
         if self.options.SSL:
             self.requires(_openSSL+"/1.0.2@conan/stable")
 
@@ -119,7 +120,9 @@ class PjsipConan(ConanFile):
         return self._autotools
         
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="0001-add-soundport-accessor.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="01-arm64linux.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="02-increase-alsa-device-count.patch")       
+        tools.patch(base_path=self._source_subfolder, patch_file="03-add-soundport-accessor.patch")
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             env_build_vars = autotools.vars

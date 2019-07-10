@@ -1,0 +1,26 @@
+diff --git a/pjmedia/include/pjmedia/audiodev.h b/pjmedia/include/pjmedia/audiodev.h
+index 9bd83e25a..e8ce76cdb 100644
+--- a/pjmedia/include/pjmedia/audiodev.h
++++ b/pjmedia/include/pjmedia/audiodev.h
+@@ -66,7 +66,7 @@ typedef pj_int32_t pjmedia_aud_dev_index;
+ #define PJMEDIA_AUD_INVALID_DEV	    -3
+ 
+ #define PJMEDIA_AUD_MAX_DRIVERS	16
+-#define PJMEDIA_AUD_MAX_DEVS	64
++#define PJMEDIA_AUD_MAX_DEVS	128
+ 
+ 
+ /** Forward declaration for pjmedia_aud_stream */
+diff --git a/pjmedia/src/pjmedia-audiodev/alsa_dev.c b/pjmedia/src/pjmedia-audiodev/alsa_dev.c
+index 674ff01bd..1c4855da0 100644
+--- a/pjmedia/src/pjmedia-audiodev/alsa_dev.c
++++ b/pjmedia/src/pjmedia-audiodev/alsa_dev.c
+@@ -43,7 +43,7 @@
+ #define ALSASOUND_CAPTURE  		2
+ #define MAX_SOUND_CARDS 		5
+ #define MAX_SOUND_DEVICES_PER_CARD 	5
+-#define MAX_DEVICES			32
++#define MAX_DEVICES			128
+ #define MAX_MIX_NAME_LEN                64 
+ 
+ /* Set to 1 to enable tracing */
