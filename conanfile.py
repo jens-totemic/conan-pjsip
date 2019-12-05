@@ -4,7 +4,7 @@ import glob
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
-_openSSL = "OpenSSL"
+_openSSL = "openssl"
 
 # based on https://github.com/conan-community/conan-ncurses/blob/stable/6.1/conanfile.py
 class PjsipConan(ConanFile):
@@ -54,7 +54,7 @@ class PjsipConan(ConanFile):
             self.requires("libasound2/1.1.0@totemic/stable")
             self.requires("libuuid1/2.27.1@totemic/stable")
         if self.options.SSL:
-            self.requires(_openSSL+"/1.0.2@conan/stable")
+            self.requires(_openSSL+"/1.1.1d")
 
     def _configure_autotools(self):
         if not self._autotools:
